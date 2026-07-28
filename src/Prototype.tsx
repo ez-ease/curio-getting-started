@@ -85,6 +85,7 @@ const checkInTimes: Choice[] = [
 
 export default function Prototype() {
   const keyboard = useKeyboard();
+  const { deviceId } = useMobileDevice();
   const [mode, setMode] = useState<"onboarding" | "conversation">(() =>
     new URLSearchParams(window.location.search).get("demo") === "ai"
       ? "conversation"
@@ -112,6 +113,26 @@ export default function Prototype() {
     layout,
     onLoadError: () => setRiveError(true),
   });
+
+  useEffect(() => {
+    if (!rive) return;
+
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        rive.resizeDrawingSurfaceToCanvas();
+      });
+    });
+    const finalResize = window.setTimeout(() => {
+      rive.resizeDrawingSurfaceToCanvas();
+    }, 220);
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+      window.clearTimeout(finalResize);
+    };
+  }, [deviceId, rive]);
 
   const fireRiveTrigger = (name: "ff" | "bw") => {
     const trigger = rive?.viewModelInstance?.trigger(name);
