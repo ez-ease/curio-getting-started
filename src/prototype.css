@@ -697,6 +697,11 @@
   margin: 0;
 }
 
+.device-screen[data-device="desktop"] .ai-rive-stage .curio-rive {
+  width: min(100%, 524px);
+  height: 100%;
+}
+
 .device-screen[data-device="desktop"] .ai-conversation {
   grid-column: 2;
   grid-row: 2;
