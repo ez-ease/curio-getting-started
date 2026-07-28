@@ -358,6 +358,8 @@ function CurioAiDemo({
   const visemeIndex = useRef(0);
   const responseTimer = useRef<number | null>(null);
   const fallbackSpeechTimer = useRef<number | null>(null);
+  const speechWatchFrame = useRef<number | null>(null);
+  const speechHasStarted = useRef(false);
   const recognition = useRef<BrowserSpeechRecognition | null>(null);
 
   const layout = useMemo(
@@ -395,13 +397,26 @@ function CurioAiDemo({
     AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
   };
 
+  const stopSpeechWatch = () => {
+    if (speechWatchFrame.current !== null) {
+      window.cancelAnimationFrame(speechWatchFrame.current);
+      speechWatchFrame.current = null;
+    }
+    speechHasStarted.current = false;
+  };
+
   const setSilentMouth = () => {
     stopVisemeTimer();
+    stopSpeechWatch();
     resetVisemeNumbers();
     setRiveNumber("mouthIdle", 100);
   };
 
   const finishSpeaking = () => {
+    if (fallbackSpeechTimer.current !== null) {
+      window.clearTimeout(fallbackSpeechTimer.current);
+      fallbackSpeechTimer.current = null;
+    }
     setSilentMouth();
     setStatus("idle");
   };
@@ -413,11 +428,31 @@ function CurioAiDemo({
     const sequence = createVisemeSequence(text);
     visemeIndex.current = 0;
 
-    visemeTimer.current = window.setInterval(() => {
+    const showNextViseme = () => {
       resetVisemeNumbers();
       setRiveNumber(sequence[visemeIndex.current % sequence.length], 100);
       visemeIndex.current += 1;
-    }, 95);
+    };
+
+    showNextViseme();
+    visemeTimer.current = window.setInterval(showNextViseme, 82);
+  };
+
+  const watchSpeechCompletion = (synthesizer: SpeechSynthesis) => {
+    stopSpeechWatch();
+
+    const checkSpeech = () => {
+      if (synthesizer.speaking) {
+        speechHasStarted.current = true;
+      } else if (speechHasStarted.current) {
+        finishSpeaking();
+        return;
+      }
+
+      speechWatchFrame.current = window.requestAnimationFrame(checkSpeech);
+    };
+
+    speechWatchFrame.current = window.requestAnimationFrame(checkSpeech);
   };
 
   const speak = (text: string) => {
@@ -436,12 +471,14 @@ function CurioAiDemo({
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.92;
-    utterance.pitch = 1.14;
+    utterance.voice = pickChildLikeVoice(synthesizer.getVoices());
+    utterance.rate = 0.98;
+    utterance.pitch = 1.22;
     utterance.onstart = () => {
       setStatus("talking");
       fireState("idle");
       startVisemes(text);
+      watchSpeechCompletion(synthesizer);
     };
     utterance.onboundary = (event) => {
       visemeIndex.current = Math.round(
@@ -556,6 +593,9 @@ function CurioAiDemo({
       if (responseTimer.current !== null) window.clearTimeout(responseTimer.current);
       if (fallbackSpeechTimer.current !== null) {
         window.clearTimeout(fallbackSpeechTimer.current);
+      }
+      if (speechWatchFrame.current !== null) {
+        window.cancelAnimationFrame(speechWatchFrame.current);
       }
       recognition.current?.stop();
       window.speechSynthesis?.cancel();
@@ -689,6 +729,33 @@ function createVisemeSequence(text: string) {
     .filter((value): value is (typeof AI_VISIMES)[number] => value !== null);
 
   return sequence.length > 0 ? sequence : ["aei"];
+}
+
+function pickChildLikeVoice(voices: SpeechSynthesisVoice[]) {
+  const englishVoices = voices.filter((voice) =>
+    voice.lang.toLowerCase().startsWith("en"),
+  );
+  const candidates = englishVoices.length > 0 ? englishVoices : voices;
+  const preferredNames = [
+    "microsoft ana",
+    "child",
+    "kid",
+    "microsoft aria",
+    "microsoft jenny",
+    "google uk english female",
+    "samantha",
+    "zira",
+  ];
+
+  return (
+    candidates
+      .map((voice) => {
+        const name = voice.name.toLowerCase();
+        const preference = preferredNames.findIndex((hint) => name.includes(hint));
+        return { voice, preference: preference === -1 ? preferredNames.length : preference };
+      })
+      .sort((a, b) => a.preference - b.preference)[0]?.voice ?? null
+  );
 }
 
 function getCurioResponse(question: string) {
