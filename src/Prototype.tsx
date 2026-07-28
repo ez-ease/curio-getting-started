@@ -19,7 +19,7 @@ import {
   SpeakerLoudIcon,
   SunIcon,
 } from "@radix-ui/react-icons";
-import { KeyboardInput, MobileScroll, useKeyboard } from "./mobile";
+import { KeyboardInput, MobileScroll, useKeyboard, useMobileDevice } from "./mobile";
 
 const STATE_MACHINE = "State Machine 1";
 const LAST_STEP = 6;
@@ -325,6 +325,7 @@ function CurioAiDemo({
   onBack: () => void;
 }) {
   const keyboard = useKeyboard();
+  const { deviceId } = useMobileDevice();
   const [question, setQuestion] = useState("");
   const [lastQuestion, setLastQuestion] = useState("");
   const [answer, setAnswer] = useState(
@@ -507,6 +508,26 @@ function CurioAiDemo({
       window.clearTimeout(second);
     };
   }, [rive]);
+
+  useEffect(() => {
+    if (!rive) return;
+
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        rive.resizeDrawingSurfaceToCanvas();
+      });
+    });
+    const finalResize = window.setTimeout(() => {
+      rive.resizeDrawingSurfaceToCanvas();
+    }, 220);
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+      window.clearTimeout(finalResize);
+    };
+  }, [deviceId, rive]);
 
   useEffect(
     () => () => {
