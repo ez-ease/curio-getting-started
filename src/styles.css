@@ -162,6 +162,67 @@ button {
   user-select: none;
 }
 
+.phone-device[data-device="desktop"] {
+  overflow: hidden;
+  border: 1px solid #25272b;
+  border-radius: 18px;
+  background: #202226;
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.22),
+    0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.desktop-browser-chrome {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 48px;
+  display: grid;
+  grid-template-columns: 100px minmax(260px, 620px) 100px;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(#2b2d32, #222429);
+  color: #c7c9cf;
+  pointer-events: none;
+}
+
+.desktop-window-controls {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  gap: 8px;
+}
+
+.desktop-window-controls i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.desktop-window-controls i:nth-child(2) {
+  background: #febc2e;
+}
+
+.desktop-window-controls i:nth-child(3) {
+  background: #28c840;
+}
+
+.desktop-address-bar {
+  grid-column: 2;
+  height: 30px;
+  padding: 0 16px;
+  border: 1px solid #3c3f45;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #181a1e;
+  font: 500 12px/1 ui-sans-serif, system-ui, sans-serif;
+}
+
 .phone-bezel {
   position: absolute;
   inset: 0;
@@ -184,6 +245,26 @@ button {
   z-index: 1;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.device-screen[data-device="desktop"] {
+  box-shadow: none;
+  cursor: default;
+}
+
+.device-screen[data-device="desktop"],
+.device-screen[data-device="desktop"] * {
+  cursor: auto !important;
+}
+
+.device-screen[data-device="desktop"] button,
+.device-screen[data-device="desktop"] a,
+.device-screen[data-device="desktop"] [role="button"] {
+  cursor: pointer !important;
+}
+
+.device-screen[data-device="desktop"] .mobile-cursor {
+  display: none;
 }
 
 .device-camera {
@@ -737,4 +818,121 @@ p {
 .keyboard-dock[data-platform="android"] .keyboard-asset {
   border-radius: 0;
   object-fit: fill;
+}
+
+.device-screen[data-device="desktop"] .onboarding-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 72px;
+  height: 100%;
+  min-height: 100%;
+  padding: 38px 76px 46px;
+}
+
+.device-screen[data-device="desktop"] .onboarding-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.device-screen[data-device="desktop"] .rive-stage {
+  grid-column: 1;
+  grid-row: 2;
+  width: 100%;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+}
+
+.device-screen[data-device="desktop"] .step-content {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  max-width: 430px;
+}
+
+.device-screen[data-device="desktop"] .step-content h1 {
+  font-size: 42px;
+}
+
+.device-screen[data-device="desktop"] .step-copy {
+  max-width: 390px;
+  font-size: 17px;
+}
+
+.device-screen[data-device="desktop"] .primary-button {
+  min-height: 62px;
+}
+
+.device-screen[data-device="desktop"] .ai-demo-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(420px, 0.82fr);
+  grid-template-rows: 42px minmax(0, 1fr);
+  gap: 18px 48px;
+  height: 100%;
+  min-height: 100%;
+  padding: 24px 48px 34px;
+}
+
+.device-screen[data-device="desktop"] .ai-demo-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.device-screen[data-device="desktop"] .ai-rive-stage {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+}
+
+.device-screen[data-device="desktop"] .ai-conversation {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  max-width: 500px;
+}
+
+.device-screen[data-device="desktop"] .curio-bubble {
+  min-height: 82px;
+  padding: 18px 20px;
+  font-size: 17px;
+}
+
+.device-screen[data-device="desktop"] .child-bubble {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.device-screen[data-device="desktop"] .prompt-row {
+  margin: 14px 0;
+}
+
+.device-screen[data-device="desktop"] .prompt-row button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.device-screen[data-device="desktop"] .ai-composer {
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 10px;
+}
+
+.device-screen[data-device="desktop"] .ai-composer input {
+  height: 54px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.device-screen[data-device="desktop"] .mic-button,
+.device-screen[data-device="desktop"] .send-button {
+  width: 52px;
+  height: 52px;
+}
+
+.device-screen[data-device="desktop"] .demo-note {
+  margin-top: 12px;
+  font-size: 11px;
 }

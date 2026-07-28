@@ -12,6 +12,9 @@
 - Fire `ff` on every forward or Continue action and `bw` on every Back action, including transitions to and from the final ready screen.
 - Preserve the complete onboarding order: Meet Curio, grown-up setup, child name, age, interests, check-in, then ready.
 - Keep the prototype self-contained and safe to embed in an iframe on the portfolio site and ezease.studio.
+- In the Curio AI conversation demo, keep `mouthIdle` at `100` only while Curio is silent. Set it to `0` before speech begins and animate only the additive viseme number inputs while Curio talks.
+- Keep the Curio AI conversation layout stretched through the full usable screen height.
+- Preserve three preview choices: iPhone, Pixel 10, and a desktop browser mockup.
 
 In ChatGPT Work Mode, run `sites-preview start "$PWD"`, open `http://terminal.local:4173/` in the cloud browser, and verify the rendered app and its primary interactions. Keep that preview open and tell the user to inspect it in the cloud browser; do not present the local URL as a user-facing chat link. In Codex Desktop, run the local server yourself, open the preview in the in-app browser, and provide the clickable local URL. Do not deploy to Sites unless the user explicitly asks to share, publish, or deploy. Do not give the user server-start instructions when you can run it.
 

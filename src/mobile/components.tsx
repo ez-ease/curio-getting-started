@@ -19,6 +19,8 @@ export function StatusBar() {
     };
   }, [now]);
 
+  if (device.platform === "desktop") return null;
+
   return (
     <div className="status-bar" aria-label="Device status bar">
       <span className="status-time" data-testid="status-time">
@@ -34,6 +36,8 @@ export function StatusBar() {
 export function HomeIndicator() {
   const { device } = useMobileDevice();
   const keyboard = useKeyboard();
+
+  if (device.platform === "desktop") return null;
 
   if (device.platform === "android") {
     if (keyboard.visible) return null;

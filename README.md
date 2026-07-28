@@ -10,6 +10,10 @@ Direct conversation demo:
 
 https://ez-ease.github.io/curio-getting-started/?demo=ai
 
+Direct desktop mockup:
+
+https://ez-ease.github.io/curio-getting-started/?demo=ai&device=desktop
+
 ## Embed
 
 ```html

@@ -88,22 +88,25 @@ export function useKeyboard() {
 export function useKeyboardInsets() {
   const keyboard = useKeyboard();
   const { device } = useMobileDevice();
+  const isDesktop = device.platform === "desktop";
   const reservesAndroidNavigation = device.platform === "android" && !keyboard.visible;
 
   return {
-    keyboardHeight: keyboard.height,
-    keyboardFullHeight: keyboard.fullHeight,
+    keyboardHeight: isDesktop ? 0 : keyboard.height,
+    keyboardFullHeight: isDesktop ? 0 : keyboard.fullHeight,
     keyboardDragging: keyboard.isDragging,
-    bottomInset: reservesAndroidNavigation
+    bottomInset: isDesktop
+      ? 0
+      : reservesAndroidNavigation
       ? 0
       : device.platform === "android"
         ? keyboard.height
         : Math.max(device.geometry.safeArea.bottom, keyboard.height),
     availableHeight:
       device.geometry.screen.height -
-      keyboard.height -
+      (isDesktop ? 0 : keyboard.height) -
       (reservesAndroidNavigation ? device.geometry.safeArea.bottom : 0),
-    isKeyboardVisible: keyboard.visible,
+    isKeyboardVisible: isDesktop ? false : keyboard.visible,
   };
 }
 
@@ -215,6 +218,8 @@ export function KeyboardDock() {
   const keyboardTransition = keyboard.isDragging
     ? { duration: 0 }
     : { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] as [number, number, number, number] };
+
+  if (device.platform === "desktop") return null;
 
   return (
     <motion.div

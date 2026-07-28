@@ -42,8 +42,9 @@ function getDeviceScale(deviceWidth: number, deviceHeight: number) {
 
   const horizontal = (window.innerWidth - 48) / deviceWidth;
   const vertical = (window.innerHeight - 48) / deviceHeight;
+  const minimum = deviceWidth > 900 ? 0.2 : 0.42;
 
-  return Math.max(0.42, Math.min(horizontal, vertical, 1));
+  return Math.max(minimum, Math.min(horizontal, vertical, 1));
 }
 
 function useDeviceScale(deviceWidth: number, deviceHeight: number) {
@@ -92,14 +93,25 @@ export function PhoneFrame({ children }: PropsWithChildren) {
               transform: `scale(${scale})`,
             }}
           >
-            <img
-              className="phone-bezel"
-              src={device.bezel}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              style={{ zIndex: device.bezelLayer === "above-screen" ? 2 : 1 }}
-            />
+            {device.bezel ? (
+              <img
+                className="phone-bezel"
+                src={device.bezel}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                style={{ zIndex: device.bezelLayer === "above-screen" ? 2 : 1 }}
+              />
+            ) : (
+              <div className="desktop-browser-chrome" aria-hidden="true">
+                <span className="desktop-window-controls">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="desktop-address-bar">curio.ai / conversation</span>
+              </div>
+            )}
             <div
               ref={screenRef}
               className="device-screen"

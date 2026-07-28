@@ -333,6 +333,7 @@ function CurioAiDemo({
   const [status, setStatus] = useState<DemoStatus>("idle");
   const [riveError, setRiveError] = useState(false);
   const visemeTimer = useRef<number | null>(null);
+  const visemeIndex = useRef(0);
   const responseTimer = useRef<number | null>(null);
   const fallbackSpeechTimer = useRef<number | null>(null);
   const recognition = useRef<BrowserSpeechRecognition | null>(null);
@@ -361,30 +362,39 @@ function CurioAiDemo({
     rive?.viewModelInstance?.trigger(name)?.trigger();
   };
 
-  const clearVisemes = () => {
+  const stopVisemeTimer = () => {
     if (visemeTimer.current !== null) {
       window.clearInterval(visemeTimer.current);
       visemeTimer.current = null;
     }
+  };
+
+  const resetVisemeNumbers = () => {
     AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
+  };
+
+  const setSilentMouth = () => {
+    stopVisemeTimer();
+    resetVisemeNumbers();
     setRiveNumber("mouthIdle", 100);
   };
 
   const finishSpeaking = () => {
-    clearVisemes();
+    setSilentMouth();
     setStatus("idle");
   };
 
   const startVisemes = (text: string) => {
-    clearVisemes();
+    stopVisemeTimer();
+    resetVisemeNumbers();
     setRiveNumber("mouthIdle", 0);
     const sequence = createVisemeSequence(text);
-    let index = 0;
+    visemeIndex.current = 0;
 
     visemeTimer.current = window.setInterval(() => {
-      AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
-      setRiveNumber(sequence[index % sequence.length], 100);
-      index += 1;
+      resetVisemeNumbers();
+      setRiveNumber(sequence[visemeIndex.current % sequence.length], 100);
+      visemeIndex.current += 1;
     }, 95);
   };
 
@@ -392,11 +402,10 @@ function CurioAiDemo({
     const synthesizer = (window as unknown as { speechSynthesis?: SpeechSynthesis })
       .speechSynthesis;
     synthesizer?.cancel();
-    setStatus("talking");
-    fireState("idle");
-    startVisemes(text);
-
     if (!synthesizer) {
+      setStatus("talking");
+      fireState("idle");
+      startVisemes(text);
       fallbackSpeechTimer.current = window.setTimeout(
         finishSpeaking,
         Math.max(1800, text.length * 45),
@@ -407,6 +416,16 @@ function CurioAiDemo({
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.92;
     utterance.pitch = 1.14;
+    utterance.onstart = () => {
+      setStatus("talking");
+      fireState("idle");
+      startVisemes(text);
+    };
+    utterance.onboundary = (event) => {
+      visemeIndex.current = Math.round(
+        (event.charIndex / Math.max(1, text.length)) * createVisemeSequence(text).length,
+      );
+    };
     utterance.onend = finishSpeaking;
     utterance.onerror = finishSpeaking;
     synthesizer.speak(utterance);
@@ -418,7 +437,7 @@ function CurioAiDemo({
 
     keyboard.hide();
     window.speechSynthesis?.cancel();
-    clearVisemes();
+    setSilentMouth();
     setQuestion("");
     setLastQuestion(cleanQuestion);
     setAnswer("");
@@ -451,7 +470,7 @@ function CurioAiDemo({
     listener.interimResults = false;
     listener.lang = "en-US";
     listener.onstart = () => {
-      clearVisemes();
+      setSilentMouth();
       setStatus("listening");
       fireState("listening");
     };
@@ -477,8 +496,7 @@ function CurioAiDemo({
     if (!rive) return;
 
     const syncMouth = () => {
-      AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
-      setRiveNumber("mouthIdle", 100);
+      setSilentMouth();
       fireState("idle");
     };
     const first = window.setTimeout(syncMouth, 0);

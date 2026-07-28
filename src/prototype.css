@@ -357,8 +357,9 @@
 
 .ai-demo-screen {
   box-sizing: border-box;
+  height: 100%;
   min-height: 100%;
-  padding: 46px 18px calc(var(--mobile-safe-area-height) + 18px);
+  padding: 44px 18px calc(var(--mobile-safe-area-height) + 12px);
   display: flex;
   flex-direction: column;
   background:
@@ -432,10 +433,10 @@
 }
 
 .ai-rive-stage {
-  flex: 1 1 270px;
-  min-height: 235px;
-  max-height: 340px;
-  margin: 2px -4px -8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0 -8px -6px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -600,6 +601,76 @@
   font-size: 9px;
   font-weight: 500;
   text-align: center;
+}
+
+.device-screen[data-device="desktop"] .ai-demo-screen {
+  grid-template-rows: 42px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.18fr) minmax(420px, 0.82fr);
+  gap: 18px 48px;
+  padding: 24px 48px 34px;
+  display: grid;
+}
+
+.device-screen[data-device="desktop"] .ai-demo-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.device-screen[data-device="desktop"] .ai-rive-stage {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  margin: 0;
+}
+
+.device-screen[data-device="desktop"] .ai-conversation {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  max-width: 500px;
+}
+
+.device-screen[data-device="desktop"] .curio-bubble {
+  min-height: 82px;
+  padding: 18px 20px;
+  font-size: 17px;
+}
+
+.device-screen[data-device="desktop"] .child-bubble {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.device-screen[data-device="desktop"] .prompt-row {
+  margin: 14px 0;
+}
+
+.device-screen[data-device="desktop"] .prompt-row button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.device-screen[data-device="desktop"] .ai-composer {
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 10px;
+}
+
+.device-screen[data-device="desktop"] .ai-composer input {
+  height: 54px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.device-screen[data-device="desktop"] .mic-button,
+.device-screen[data-device="desktop"] .send-button {
+  width: 52px;
+  height: 52px;
+}
+
+.device-screen[data-device="desktop"] .demo-note {
+  margin-top: 12px;
+  font-size: 11px;
 }
 
 @keyframes curio-pulse {

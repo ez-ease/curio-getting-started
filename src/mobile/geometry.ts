@@ -65,4 +65,25 @@ export const pixelGeometry = {
   },
 } as const satisfies MobileDeviceGeometry;
 
+export const desktopGeometry = {
+  device: {
+    width: 1280,
+    height: 820,
+  },
+  screen: {
+    x: 12,
+    y: 48,
+    width: 1256,
+    height: 760,
+    radius: 10,
+  },
+  safeArea: {
+    top: 0,
+    bottom: 0,
+  },
+  keyboard: {
+    height: 0,
+  },
+} as const satisfies MobileDeviceGeometry;
+
 export type IPhoneGeometry = typeof iphoneGeometry;

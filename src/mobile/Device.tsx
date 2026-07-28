@@ -2,15 +2,21 @@ import { createContext, type PropsWithChildren, useContext, useMemo, useState } 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { mobileAssets } from "./assets";
-import { iphoneGeometry, pixelGeometry, type MobileDeviceGeometry } from "./geometry";
+import {
+  desktopGeometry,
+  iphoneGeometry,
+  pixelGeometry,
+  type MobileDeviceGeometry,
+} from "./geometry";
 
-export type MobileDeviceId = "iphone" | "pixel-10";
+export type MobileDeviceId = "iphone" | "pixel-10" | "desktop";
+export type MobilePlatform = "ios" | "android" | "desktop";
 
 type MobileDevicePreset = {
   id: MobileDeviceId;
   label: string;
-  platform: "ios" | "android";
-  bezel: string;
+  platform: MobilePlatform;
+  bezel?: string;
   bezelLayer: "above-screen" | "below-screen";
   geometry: MobileDeviceGeometry;
   camera?: {
@@ -40,6 +46,13 @@ export const mobileDevices: Record<MobileDeviceId, MobileDevicePreset> = {
       top: 23,
     },
   },
+  desktop: {
+    id: "desktop",
+    label: "Desktop",
+    platform: "desktop",
+    bezelLayer: "below-screen",
+    geometry: desktopGeometry,
+  },
 };
 
 type MobileDeviceContextValue = {
@@ -51,7 +64,12 @@ type MobileDeviceContextValue = {
 const MobileDeviceContext = createContext<MobileDeviceContextValue | null>(null);
 
 export function MobileDeviceProvider({ children }: PropsWithChildren) {
-  const [deviceId, setDeviceId] = useState<MobileDeviceId>("iphone");
+  const [deviceId, setDeviceId] = useState<MobileDeviceId>(() => {
+    const requested = new URLSearchParams(window.location.search).get("device");
+    return requested && requested in mobileDevices
+      ? (requested as MobileDeviceId)
+      : "iphone";
+  });
   const value = useMemo(
     () => ({ device: mobileDevices[deviceId], deviceId, setDeviceId }),
     [deviceId],
