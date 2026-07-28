@@ -22,6 +22,7 @@ import {
 import { KeyboardInput, MobileScroll, useKeyboard, useMobileDevice } from "./mobile";
 
 const STATE_MACHINE = "State Machine 1";
+const VISEME_MICRO_GAP_MS = 80;
 const LAST_STEP = 6;
 const AI_VISIMES = [
   "aei",
@@ -98,7 +99,7 @@ const checkInTimes: Choice[] = [
 
 export default function Prototype() {
   const keyboard = useKeyboard();
-  const { deviceId } = useMobileDevice();
+  const { deviceId, setDeviceId } = useMobileDevice();
   const [mode, setMode] = useState<"onboarding" | "conversation">(() =>
     new URLSearchParams(window.location.search).get("demo") === "ai"
       ? "conversation"
@@ -111,6 +112,17 @@ export default function Prototype() {
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [riveError, setRiveError] = useState(false);
+  const hasAppliedDefaultDevice = useRef(false);
+
+  useEffect(() => {
+    if (hasAppliedDefaultDevice.current) return;
+    hasAppliedDefaultDevice.current = true;
+
+    const requestedDevice = new URLSearchParams(window.location.search).get("device");
+    if (!requestedDevice && deviceId !== "desktop") {
+      setDeviceId("desktop");
+    }
+  }, [deviceId, setDeviceId]);
 
   const layout = useMemo(
     () => new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
@@ -145,7 +157,7 @@ export default function Prototype() {
       if (secondFrame) window.cancelAnimationFrame(secondFrame);
       window.clearTimeout(finalResize);
     };
-  }, [deviceId, rive]);
+  }, [deviceId, keyboard.visible, rive]);
 
   const fireRiveTrigger = (name: "ff" | "bw") => {
     const trigger = rive?.viewModelInstance?.trigger(name);
@@ -191,35 +203,37 @@ export default function Prototype() {
   return (
     <MobileScroll className="app-screen curio-app">
       <main className="onboarding-screen" data-testid="curio-onboarding">
-        <header className="onboarding-header">
-          {step > 0 && step < LAST_STEP ? (
-            <button
-              className="back-button"
-              type="button"
-              onClick={moveBackward}
-              aria-label="Go back"
-              data-testid="back-button"
-            >
-              <ArrowLeftIcon />
-            </button>
+        <header className={step === 0 ? "onboarding-header is-landing" : "onboarding-header"}>
+          {step === 0 ? (
+            <CurioBrand />
           ) : (
-            <span className="header-spacer" aria-hidden="true" />
-          )}
+            <>
+              {step < LAST_STEP ? (
+                <button
+                  className="back-button"
+                  type="button"
+                  onClick={moveBackward}
+                  aria-label="Go back"
+                  data-testid="back-button"
+                >
+                  <ArrowLeftIcon />
+                </button>
+              ) : (
+                <span className="header-spacer" aria-hidden="true" />
+              )}
 
-          {step > 0 ? (
-            <div className="progress-dots" aria-label={`Step ${progress} of ${LAST_STEP}`}>
-              {Array.from({ length: LAST_STEP }, (_, index) => (
-                <span
-                  className={index + 1 === progress ? "progress-dot is-active" : "progress-dot"}
-                  key={index}
-                />
-              ))}
-            </div>
-          ) : (
-            <span className="curio-wordmark">CURIO</span>
-          )}
+              <div className="progress-dots" aria-label={`Step ${progress} of ${LAST_STEP}`}>
+                {Array.from({ length: LAST_STEP }, (_, index) => (
+                  <span
+                    className={index + 1 === progress ? "progress-dot is-active" : "progress-dot"}
+                    key={index}
+                  />
+                ))}
+              </div>
 
-          <span className="header-spacer" aria-hidden="true" />
+              <span className="header-spacer" aria-hidden="true" />
+            </>
+          )}
         </header>
 
         <section className="rive-stage" aria-label="Animated Curio character">
@@ -386,7 +400,7 @@ function CurioAiDemo({
   );
 
   const { rive, RiveComponent } = useRive({
-    src: `${import.meta.env.BASE_URL}assets/curio/curio-ai-build-library.riv`,
+    src: `${import.meta.env.BASE_URL}assets/curio/curio-ai-build-library.riv?v=20260728-1923`,
     artboard: "Curio",
     stateMachines: STATE_MACHINE,
     autoplay: true,
@@ -430,6 +444,10 @@ function CurioAiDemo({
     }
     if (presetAudio.current) {
       presetAudio.current.onplay = null;
+      presetAudio.current.onloadedmetadata = null;
+      presetAudio.current.onplaying = null;
+      presetAudio.current.onwaiting = null;
+      presetAudio.current.onpause = null;
       presetAudio.current.onended = null;
       presetAudio.current.onerror = null;
       presetAudio.current.pause();
@@ -578,11 +596,28 @@ function CurioAiDemo({
       audio.preload = "auto";
       presetAudio.current = audio;
       presetCueIndex.current = 0;
+      const cueTimelineDurationMs = track.cues.reduce(
+        (duration, cue) => Math.max(duration, cue.timeMs + cue.durationMs),
+        0,
+      );
+      let cueTimelineScale = 1;
+
+      const syncCueTimelineToAudio = () => {
+        const audioDurationMs = audio.duration * 1000;
+        if (
+          Number.isFinite(audioDurationMs) &&
+          audioDurationMs > 0 &&
+          cueTimelineDurationMs > 0
+        ) {
+          cueTimelineScale = audioDurationMs / cueTimelineDurationMs;
+        }
+      };
 
       const drawPresetViseme = () => {
         if (presetAudio.current !== audio) return;
 
-        const timeMs = audio.currentTime * 1000;
+        syncCueTimelineToAudio();
+        const timeMs = (audio.currentTime * 1000) / cueTimelineScale;
         while (
           presetCueIndex.current + 1 < track.cues.length &&
           track.cues[presetCueIndex.current + 1].timeMs <= timeMs
@@ -591,9 +626,21 @@ function CurioAiDemo({
         }
 
         const cue = track.cues[presetCueIndex.current];
+        const nextCue = track.cues[presetCueIndex.current + 1];
+        const cueEndMs = cue ? cue.timeMs + cue.durationMs : 0;
+        const activeUntilMs =
+          cue &&
+          nextCue &&
+          nextCue.timeMs - cueEndMs < VISEME_MICRO_GAP_MS
+            ? nextCue.timeMs
+            : cueEndMs;
+        const cueIsActive =
+          cue &&
+          timeMs >= cue.timeMs &&
+          timeMs < activeUntilMs;
 
         resetVisemeNumbers();
-        if (cue && timeMs >= cue.timeMs && cue.viseme !== "mouthIdle") {
+        if (cueIsActive && cue.viseme !== "mouthIdle") {
           setRiveNumber("mouthIdle", 0);
           setRiveNumber(cue.viseme, 100);
         } else {
@@ -604,11 +651,26 @@ function CurioAiDemo({
           window.requestAnimationFrame(drawPresetViseme);
       };
 
-      audio.onplay = () => {
+      audio.onloadedmetadata = syncCueTimelineToAudio;
+      audio.onplaying = () => {
+        syncCueTimelineToAudio();
         setStatus("talking");
         fireState("idle");
+        if (presetAnimationFrame.current !== null) {
+          window.cancelAnimationFrame(presetAnimationFrame.current);
+        }
         presetAnimationFrame.current =
           window.requestAnimationFrame(drawPresetViseme);
+      };
+      audio.onwaiting = () => {
+        if (presetAnimationFrame.current !== null) {
+          window.cancelAnimationFrame(presetAnimationFrame.current);
+          presetAnimationFrame.current = null;
+        }
+        setSilentMouth();
+      };
+      audio.onpause = () => {
+        if (!audio.ended) setSilentMouth();
       };
       audio.onended = finishSpeaking;
       audio.onerror = () => {
@@ -723,7 +785,7 @@ function CurioAiDemo({
       if (secondFrame) window.cancelAnimationFrame(secondFrame);
       window.clearTimeout(finalResize);
     };
-  }, [deviceId, rive]);
+  }, [deviceId, keyboard.visible, rive]);
 
   useEffect(
     () => () => {
@@ -770,10 +832,7 @@ function CurioAiDemo({
           >
             <ArrowLeftIcon />
           </button>
-          <div className="ai-demo-title">
-            <strong>CURIO</strong>
-            <span>AI DEMO</span>
-          </div>
+          <CurioBrand subtitle="AI DEMO" />
           <div className={`ai-status status-${status}`}>
             <span aria-hidden="true" />
             {statusCopy}
@@ -853,6 +912,31 @@ function CurioAiDemo({
         </section>
       </main>
     </MobileScroll>
+  );
+}
+
+function CurioBrand({ subtitle }: { subtitle?: string }) {
+  const logoLayout = useMemo(
+    () => new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
+    [],
+  );
+  const { RiveComponent: LogoMark } = useRive({
+    src: `${import.meta.env.BASE_URL}assets/curio/curio-avatar.riv`,
+    artboard: "Curio",
+    stateMachines: STATE_MACHINE,
+    autoplay: true,
+    autoBind: true,
+    layout: logoLayout,
+  });
+
+  return (
+    <div className="curio-brand" aria-label={subtitle ? `Curio ${subtitle}` : "Curio"}>
+      <LogoMark className="curio-logo-mark" aria-hidden="true" />
+      <span className="curio-brand-copy">
+        <strong>CURIO</strong>
+        {subtitle ? <small>{subtitle}</small> : null}
+      </span>
+    </div>
   );
 }
 

@@ -14,6 +14,35 @@
   --curio-surface: #fffdf9;
 }
 
+.phone-stage:has(.phone-device[data-device="desktop"]) {
+  padding: 0;
+}
+
+.phone-stage:has(.phone-device[data-device="desktop"]) .phone-scale-box,
+.phone-stage:has(.phone-device[data-device="desktop"]) .phone-device {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.phone-stage:has(.phone-device[data-device="desktop"]) .phone-device {
+  transform: none !important;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.phone-stage:has(.phone-device[data-device="desktop"]) .desktop-browser-chrome {
+  display: none;
+}
+
+.phone-stage:has(.phone-device[data-device="desktop"]) .device-screen[data-device="desktop"] {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
 .curio-app {
   background: var(--curio-surface);
   color: var(--curio-ink);
@@ -26,6 +55,9 @@
 
 .onboarding-screen {
   box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 100%;
   padding: 48px 22px calc(var(--mobile-safe-area-height) + 24px);
   display: flex;
@@ -33,11 +65,41 @@
   background: var(--curio-surface);
 }
 
+.device-screen:not([data-device="desktop"]) .onboarding-screen {
+  height: 100%;
+  min-height: 0;
+  padding: 38px 16px calc(var(--mobile-safe-area-height) + 18px);
+  display: grid;
+  grid-template-rows: 62px minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.device-screen:not([data-device="desktop"]) .onboarding-header {
+  grid-row: 1;
+}
+
+.device-screen:not([data-device="desktop"]) .rive-stage {
+  grid-row: 2;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+}
+
+.device-screen:not([data-device="desktop"]) .step-content {
+  grid-row: 3;
+  align-self: end;
+}
+
 .onboarding-header {
   display: grid;
   grid-template-columns: 42px 1fr 42px;
   align-items: center;
-  min-height: 38px;
+  min-height: 62px;
+}
+
+.onboarding-header.is-landing {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .back-button,
@@ -79,6 +141,48 @@
   color: var(--curio-purple);
 }
 
+.curio-brand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 10px;
+  color: var(--curio-purple);
+}
+
+.curio-logo-mark {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: block;
+  overflow: hidden;
+}
+
+.curio-logo-mark canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.curio-brand-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.curio-brand-copy strong {
+  font-size: 15px;
+  letter-spacing: 0.15em;
+}
+
+.curio-brand-copy small {
+  color: var(--curio-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .progress-dots {
   justify-self: center;
   display: flex;
@@ -100,6 +204,7 @@
 }
 
 .rive-stage {
+  container-type: size;
   flex: 1 1 300px;
   min-height: 260px;
   max-height: 420px;
@@ -110,8 +215,9 @@
 }
 
 .curio-rive {
-  width: 100%;
-  height: 100%;
+  width: min(100cqw, 75cqh);
+  height: auto;
+  aspect-ratio: 3 / 4;
   min-width: 0;
   min-height: 0;
   max-width: 100%;
@@ -383,7 +489,7 @@
   grid-template-columns: 42px 1fr auto;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 62px;
 }
 
 .ai-demo-title {
@@ -444,6 +550,7 @@
 }
 
 .ai-rive-stage {
+  container-type: size;
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
@@ -615,25 +722,38 @@
 }
 
 .device-screen[data-device="desktop"] .ai-demo-screen {
-  grid-template-rows: 42px minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1.18fr) minmax(420px, 0.82fr);
-  gap: 18px 48px;
-  padding: 24px 48px 34px;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: 62px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 24px 48px 28px;
   display: grid;
+}
+
+.device-screen[data-device="desktop"] .mobile-scroll {
+  overflow: hidden;
+}
+
+.device-screen[data-device="desktop"] .mobile-scroll-content {
+  height: 100%;
+  min-height: 0;
 }
 
 .device-screen[data-device="desktop"] .onboarding-screen {
   height: 100%;
-  grid-template-rows: 42px minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr);
-  gap: 18px 64px;
-  padding: 24px 72px 34px;
+  min-height: 0;
+  grid-template-rows: 62px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 24px 48px 28px;
   display: grid;
 }
 
 .device-screen[data-device="desktop"] .onboarding-header {
-  grid-column: 1 / -1;
+  grid-column: 1;
   grid-row: 1;
+  padding-right: 100px;
 }
 
 .device-screen[data-device="desktop"] .rive-stage {
@@ -644,11 +764,17 @@
   margin: 0;
 }
 
+.device-screen[data-device="desktop"] .rive-stage .curio-rive {
+  width: min(100cqw, 75cqh);
+  height: auto;
+  aspect-ratio: 3 / 4;
+}
+
 .device-screen[data-device="desktop"] .step-content {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: center;
-  max-width: 430px;
+  grid-column: 1;
+  grid-row: 3;
+  align-self: end;
+  max-width: 640px;
 }
 
 .device-screen[data-device="desktop"] .step-content h1 {
@@ -686,8 +812,9 @@
 }
 
 .device-screen[data-device="desktop"] .ai-demo-header {
-  grid-column: 1 / -1;
+  grid-column: 1;
   grid-row: 1;
+  padding-right: 100px;
 }
 
 .device-screen[data-device="desktop"] .ai-rive-stage {
@@ -698,15 +825,17 @@
 }
 
 .device-screen[data-device="desktop"] .ai-rive-stage .curio-rive {
-  width: min(100%, 524px);
-  height: 100%;
+  width: min(100cqw, 75cqh);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  transform: none;
 }
 
 .device-screen[data-device="desktop"] .ai-conversation {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: center;
-  max-width: 500px;
+  grid-column: 1;
+  grid-row: 3;
+  align-self: end;
+  max-width: 640px;
 }
 
 .device-screen[data-device="desktop"] .curio-bubble {
@@ -750,6 +879,30 @@
 .device-screen[data-device="desktop"] .demo-note {
   margin-top: 12px;
   font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .device-screen[data-device="desktop"] .ai-demo-screen {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .device-screen[data-device="desktop"] .ai-rive-stage .curio-rive {
+    width: min(100cqw, 75cqh);
+  }
+
+  .device-screen[data-device="desktop"] .onboarding-screen {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .device-screen[data-device="desktop"] .rive-stage .curio-rive {
+    width: min(100cqw, 75cqh);
+  }
 }
 
 @keyframes curio-pulse {
