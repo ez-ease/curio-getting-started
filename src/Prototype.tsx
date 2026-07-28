@@ -591,11 +591,9 @@ function CurioAiDemo({
         }
 
         const cue = track.cues[presetCueIndex.current];
-        const cueIsActive =
-          cue && timeMs >= cue.timeMs && timeMs < cue.timeMs + cue.durationMs;
 
         resetVisemeNumbers();
-        if (cueIsActive && cue.viseme !== "mouthIdle") {
+        if (cue && timeMs >= cue.timeMs && cue.viseme !== "mouthIdle") {
           setRiveNumber("mouthIdle", 0);
           setRiveNumber(cue.viseme, 100);
         } else {
