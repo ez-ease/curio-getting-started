@@ -6,14 +6,18 @@ An interactive mobile onboarding prototype for Curio, the AI scientist companion
 
 https://ez-ease.github.io/curio-getting-started/
 
+Direct conversation demo:
+
+https://ez-ease.github.io/curio-getting-started/?demo=ai
+
 ## Embed
 
 ```html
 <iframe
-  src="https://ez-ease.github.io/curio-getting-started/"
-  title="Curio interactive onboarding demo"
+  src="https://ez-ease.github.io/curio-getting-started/?demo=ai"
+  title="Curio interactive conversation demo"
   loading="lazy"
-  allow="autoplay; fullscreen"
+  allow="microphone; autoplay; fullscreen"
   style="width: 100%; height: 820px; border: 0; border-radius: 24px;"
 ></iframe>
 ```

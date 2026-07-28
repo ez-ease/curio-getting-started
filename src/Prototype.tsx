@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alignment,
   Fit,
@@ -14,13 +14,55 @@ import {
   GlobeIcon,
   MagicWandIcon,
   MoonIcon,
+  PaperPlaneIcon,
   RocketIcon,
+  SpeakerLoudIcon,
   SunIcon,
 } from "@radix-ui/react-icons";
 import { KeyboardInput, MobileScroll, useKeyboard } from "./mobile";
 
 const STATE_MACHINE = "State Machine 1";
 const LAST_STEP = 6;
+const AI_VISIMES = [
+  "aei",
+  "o",
+  "r",
+  "chjsh",
+  "bmp",
+  "th",
+  "fv",
+  "qwod",
+  "cdgknstxyz",
+] as const;
+
+type DemoStatus = "idle" | "listening" | "thinking" | "talking";
+
+type SpeechRecognitionResultEvent = {
+  results: {
+    0: {
+      0: {
+        transcript: string;
+      };
+    };
+  };
+};
+
+type BrowserSpeechRecognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionWindow = Window & {
+  SpeechRecognition?: new () => BrowserSpeechRecognition;
+  webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
+};
 
 type Choice = {
   label: string;
@@ -43,6 +85,11 @@ const checkInTimes: Choice[] = [
 
 export default function Prototype() {
   const keyboard = useKeyboard();
+  const [mode, setMode] = useState<"onboarding" | "conversation">(() =>
+    new URLSearchParams(window.location.search).get("demo") === "ai"
+      ? "conversation"
+      : "onboarding",
+  );
   const [step, setStep] = useState(0);
   const [childName, setChildName] = useState("");
   const [age, setAge] = useState<string | null>(null);
@@ -97,6 +144,15 @@ export default function Prototype() {
     keyboard.hide();
     setStep(Math.max(0, step - 1));
   };
+
+  if (mode === "conversation") {
+    return (
+      <CurioAiDemo
+        childName={childName.trim()}
+        onBack={() => setMode("onboarding")}
+      />
+    );
+  }
 
   return (
     <MobileScroll className="app-screen curio-app">
@@ -243,7 +299,15 @@ export default function Prototype() {
               <p className="step-copy">
                 Let’s explore your first big question{childName.trim() ? `, ${childName.trim()}` : ""}.
               </p>
-              <PrimaryButton onClick={() => fireRiveTrigger("ff")}>Start first mission</PrimaryButton>
+              <PrimaryButton
+                onClick={() => {
+                  if (!fireRiveTrigger("ff")) return;
+                  keyboard.hide();
+                  setMode("conversation");
+                }}
+              >
+                Talk to Curio
+              </PrimaryButton>
               <button className="text-button" type="button" onClick={moveBackward}>Review settings</button>
             </>
           )}
@@ -251,6 +315,345 @@ export default function Prototype() {
       </main>
     </MobileScroll>
   );
+}
+
+function CurioAiDemo({
+  childName,
+  onBack,
+}: {
+  childName: string;
+  onBack: () => void;
+}) {
+  const keyboard = useKeyboard();
+  const [question, setQuestion] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
+  const [answer, setAnswer] = useState(
+    `Hi${childName ? `, ${childName}` : ""}! Ask me a curious question.`,
+  );
+  const [status, setStatus] = useState<DemoStatus>("idle");
+  const [riveError, setRiveError] = useState(false);
+  const visemeTimer = useRef<number | null>(null);
+  const responseTimer = useRef<number | null>(null);
+  const fallbackSpeechTimer = useRef<number | null>(null);
+  const recognition = useRef<BrowserSpeechRecognition | null>(null);
+
+  const layout = useMemo(
+    () => new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
+    [],
+  );
+
+  const { rive, RiveComponent } = useRive({
+    src: `${import.meta.env.BASE_URL}assets/curio/curio-ai-build-library.riv`,
+    artboard: "Curio",
+    stateMachines: STATE_MACHINE,
+    autoplay: true,
+    autoBind: true,
+    layout,
+    onLoadError: () => setRiveError(true),
+  });
+
+  const setRiveNumber = (name: string, value: number) => {
+    const input = rive?.viewModelInstance?.number(name);
+    if (input) input.value = value;
+  };
+
+  const fireState = (name: "idle" | "thinking" | "listening") => {
+    rive?.viewModelInstance?.trigger(name)?.trigger();
+  };
+
+  const clearVisemes = () => {
+    if (visemeTimer.current !== null) {
+      window.clearInterval(visemeTimer.current);
+      visemeTimer.current = null;
+    }
+    AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
+    setRiveNumber("mouthIdle", 100);
+  };
+
+  const finishSpeaking = () => {
+    clearVisemes();
+    setStatus("idle");
+  };
+
+  const startVisemes = (text: string) => {
+    clearVisemes();
+    setRiveNumber("mouthIdle", 0);
+    const sequence = createVisemeSequence(text);
+    let index = 0;
+
+    visemeTimer.current = window.setInterval(() => {
+      AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
+      setRiveNumber(sequence[index % sequence.length], 100);
+      index += 1;
+    }, 95);
+  };
+
+  const speak = (text: string) => {
+    const synthesizer = (window as unknown as { speechSynthesis?: SpeechSynthesis })
+      .speechSynthesis;
+    synthesizer?.cancel();
+    setStatus("talking");
+    fireState("idle");
+    startVisemes(text);
+
+    if (!synthesizer) {
+      fallbackSpeechTimer.current = window.setTimeout(
+        finishSpeaking,
+        Math.max(1800, text.length * 45),
+      );
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.92;
+    utterance.pitch = 1.14;
+    utterance.onend = finishSpeaking;
+    utterance.onerror = finishSpeaking;
+    synthesizer.speak(utterance);
+  };
+
+  const askCurio = (rawQuestion: string) => {
+    const cleanQuestion = rawQuestion.trim();
+    if (!cleanQuestion || status === "thinking" || status === "talking") return;
+
+    keyboard.hide();
+    window.speechSynthesis?.cancel();
+    clearVisemes();
+    setQuestion("");
+    setLastQuestion(cleanQuestion);
+    setAnswer("");
+    setStatus("thinking");
+    fireState("thinking");
+
+    responseTimer.current = window.setTimeout(() => {
+      const response = getCurioResponse(cleanQuestion);
+      setAnswer(response);
+      speak(response);
+    }, 900);
+  };
+
+  const startListening = () => {
+    if (status === "thinking" || status === "talking") return;
+
+    const browserWindow = window as SpeechRecognitionWindow;
+    const Recognition =
+      browserWindow.SpeechRecognition ?? browserWindow.webkitSpeechRecognition;
+
+    if (!Recognition) {
+      setAnswer("Your browser cannot use the microphone here. Type your question instead!");
+      return;
+    }
+
+    keyboard.hide();
+    const listener = new Recognition();
+    recognition.current = listener;
+    listener.continuous = false;
+    listener.interimResults = false;
+    listener.lang = "en-US";
+    listener.onstart = () => {
+      clearVisemes();
+      setStatus("listening");
+      fireState("listening");
+    };
+    listener.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuestion(transcript);
+      setStatus("idle");
+      window.setTimeout(() => askCurio(transcript), 120);
+    };
+    listener.onerror = () => {
+      setStatus("idle");
+      fireState("idle");
+      setAnswer("I missed that. Try the microphone again, or type your question.");
+    };
+    listener.onend = () => {
+      recognition.current = null;
+      setStatus((current) => (current === "listening" ? "idle" : current));
+    };
+    listener.start();
+  };
+
+  useEffect(() => {
+    if (!rive) return;
+
+    const syncMouth = () => {
+      AI_VISIMES.forEach((name) => setRiveNumber(name, 0));
+      setRiveNumber("mouthIdle", 100);
+      fireState("idle");
+    };
+    const first = window.setTimeout(syncMouth, 0);
+    const second = window.setTimeout(syncMouth, 250);
+
+    return () => {
+      window.clearTimeout(first);
+      window.clearTimeout(second);
+    };
+  }, [rive]);
+
+  useEffect(
+    () => () => {
+      if (visemeTimer.current !== null) window.clearInterval(visemeTimer.current);
+      if (responseTimer.current !== null) window.clearTimeout(responseTimer.current);
+      if (fallbackSpeechTimer.current !== null) {
+        window.clearTimeout(fallbackSpeechTimer.current);
+      }
+      recognition.current?.stop();
+      window.speechSynthesis?.cancel();
+    },
+    [],
+  );
+
+  const statusCopy = {
+    idle: "Ready",
+    listening: "Listening…",
+    thinking: "Thinking…",
+    talking: "Talking",
+  }[status];
+
+  return (
+    <MobileScroll className="app-screen curio-app curio-ai-app">
+      <main className="ai-demo-screen" data-testid="curio-ai-demo">
+        <header className="ai-demo-header">
+          <button
+            className="back-button"
+            type="button"
+            onClick={() => {
+              keyboard.hide();
+              onBack();
+            }}
+            aria-label="Back to setup"
+          >
+            <ArrowLeftIcon />
+          </button>
+          <div className="ai-demo-title">
+            <strong>CURIO</strong>
+            <span>AI DEMO</span>
+          </div>
+          <div className={`ai-status status-${status}`}>
+            <span aria-hidden="true" />
+            {statusCopy}
+          </div>
+        </header>
+
+        <section className="ai-rive-stage" aria-label="Curio conversation animation">
+          {riveError ? (
+            <p className="rive-fallback">Curio is getting ready.</p>
+          ) : (
+            <RiveComponent className="curio-rive" aria-label="Curio AI character" />
+          )}
+        </section>
+
+        <section className="ai-conversation" aria-live="polite">
+          {lastQuestion && <p className="child-bubble">{lastQuestion}</p>}
+          <div className={answer ? "curio-bubble" : "curio-bubble is-thinking"}>
+            {answer || (
+              <>
+                <span />
+                <span />
+                <span />
+              </>
+            )}
+          </div>
+
+          <div className="prompt-row" aria-label="Try a question">
+            {["Why is the sky blue?", "How do plants eat?", "Tell me about the Moon"].map(
+              (prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => askCurio(prompt)}
+                  disabled={status === "thinking" || status === "talking"}
+                >
+                  {prompt}
+                </button>
+              ),
+            )}
+          </div>
+
+          <div className="ai-composer">
+            <label>
+              <span className="sr-only">Ask Curio a question</span>
+              <KeyboardInput
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") askCurio(question);
+                }}
+                placeholder="Ask Curio anything…"
+                autoComplete="off"
+                data-testid="curio-question-input"
+              />
+            </label>
+            <button
+              className={status === "listening" ? "mic-button is-listening" : "mic-button"}
+              type="button"
+              onClick={startListening}
+              aria-label={status === "listening" ? "Listening" : "Ask with microphone"}
+              disabled={status === "thinking" || status === "talking"}
+            >
+              <SpeakerLoudIcon />
+            </button>
+            <button
+              className="send-button"
+              type="button"
+              onClick={() => askCurio(question)}
+              aria-label="Send question"
+              disabled={!question.trim() || status === "thinking" || status === "talking"}
+            >
+              <PaperPlaneIcon />
+            </button>
+          </div>
+
+          <p className="demo-note">Free interactive demo · no account needed</p>
+        </section>
+      </main>
+    </MobileScroll>
+  );
+}
+
+function createVisemeSequence(text: string) {
+  const sequence = text
+    .toLowerCase()
+    .split("")
+    .map<(typeof AI_VISIMES)[number] | null>((letter) => {
+      if ("aeiy".includes(letter)) return "aei";
+      if ("ouw".includes(letter)) return "qwod";
+      if (letter === "r") return "r";
+      if (letter === "j") return "chjsh";
+      if ("bmp".includes(letter)) return "bmp";
+      if (letter === "h") return "th";
+      if ("fv".includes(letter)) return "fv";
+      if ("cdgknstxzq".includes(letter)) return "cdgknstxyz";
+      return null;
+    })
+    .filter((value): value is (typeof AI_VISIMES)[number] => value !== null);
+
+  return sequence.length > 0 ? sequence : ["aei"];
+}
+
+function getCurioResponse(question: string) {
+  const lower = question.toLowerCase();
+
+  if (lower.includes("sky") && lower.includes("blue")) {
+    return "Sunlight is made of many colors. Blue light bounces around the sky more than the other colors, so blue reaches our eyes from every direction!";
+  }
+  if (lower.includes("plant") || lower.includes("tree") || lower.includes("flower")) {
+    return "Plants make their own food! Their leaves use sunlight, water, and air in a process called photosynthesis. It is like a tiny solar-powered kitchen.";
+  }
+  if (lower.includes("moon")) {
+    return "The Moon does not make its own light. It reflects sunlight, like a giant rocky mirror orbiting Earth.";
+  }
+  if (lower.includes("dinosaur")) {
+    return "Dinosaurs lived millions of years ago. Some ate plants, some ate meat, and birds are their living relatives today!";
+  }
+  if (lower.includes("space") || lower.includes("star") || lower.includes("planet")) {
+    return "Space is full of stars, planets, dust, and giant clouds of gas. Every bright star you see is a distant sun.";
+  }
+  if (lower.includes("sleep")) {
+    return "Sleep helps your brain organize everything you learned. It is like charging your curious-mind battery for tomorrow.";
+  }
+
+  return "That is a brilliant scientist question! First, tell me what you notice. Then we can make a guess and find a way to test it together.";
 }
 
 function PrimaryButton({
