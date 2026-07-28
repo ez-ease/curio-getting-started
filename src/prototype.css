@@ -611,6 +611,69 @@
   display: grid;
 }
 
+.device-screen[data-device="desktop"] .onboarding-screen {
+  height: 100%;
+  grid-template-rows: 42px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr);
+  gap: 18px 64px;
+  padding: 24px 72px 34px;
+  display: grid;
+}
+
+.device-screen[data-device="desktop"] .onboarding-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.device-screen[data-device="desktop"] .rive-stage {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+}
+
+.device-screen[data-device="desktop"] .step-content {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  max-width: 430px;
+}
+
+.device-screen[data-device="desktop"] .step-content h1 {
+  font-size: 42px;
+}
+
+.device-screen[data-device="desktop"] .step-copy {
+  max-width: 410px;
+  margin: 14px auto 24px;
+  font-size: 18px;
+}
+
+.device-screen[data-device="desktop"] .eyebrow {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.device-screen[data-device="desktop"] .primary-button {
+  min-height: 66px;
+  border-radius: 20px;
+  font-size: 19px;
+}
+
+.device-screen[data-device="desktop"] .choice-grid {
+  gap: 12px;
+}
+
+.device-screen[data-device="desktop"] .choice-card {
+  min-height: 122px;
+  font-size: 15px;
+}
+
+.device-screen[data-device="desktop"] .age-choice {
+  height: 88px;
+}
+
 .device-screen[data-device="desktop"] .ai-demo-header {
   grid-column: 1 / -1;
   grid-row: 1;
