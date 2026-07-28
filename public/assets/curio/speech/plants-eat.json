@@ -1,0 +1,547 @@
+﻿{
+    "id":  "plants-eat",
+    "text":  "Plants make their own food! Their leaves use sunlight, water, and air in a process called photosynthesis. It is like a tiny solar-powered kitchen.",
+    "voice":  "Microsoft Zira Desktop",
+    "cues":  [
+                 {
+                     "timeMs":  0,
+                     "durationMs":  100,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  137,
+                     "durationMs":  70,
+                     "viseme":  "bmp"
+                 },
+                 {
+                     "timeMs":  234,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  296,
+                     "durationMs":  120,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  461,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  523,
+                     "durationMs":  35,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  571,
+                     "durationMs":  70,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  668,
+                     "durationMs":  55,
+                     "viseme":  "bmp"
+                 },
+                 {
+                     "timeMs":  743,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  743,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  881,
+                     "durationMs":  80,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  991,
+                     "durationMs":  50,
+                     "viseme":  "th"
+                 },
+                 {
+                     "timeMs":  1060,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  1129,
+                     "durationMs":  85,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  1246,
+                     "durationMs":  120,
+                     "viseme":  "o"
+                 },
+                 {
+                     "timeMs":  1412,
+                     "durationMs":  80,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  1522,
+                     "durationMs":  100,
+                     "viseme":  "fv"
+                 },
+                 {
+                     "timeMs":  1660,
+                     "durationMs":  200,
+                     "viseme":  "qwod"
+                 },
+                 {
+                     "timeMs":  1935,
+                     "durationMs":  80,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  2046,
+                     "durationMs":  750,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  3079,
+                     "durationMs":  100,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  3217,
+                     "durationMs":  45,
+                     "viseme":  "th"
+                 },
+                 {
+                     "timeMs":  3279,
+                     "durationMs":  70,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  3375,
+                     "durationMs":  85,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  3492,
+                     "durationMs":  75,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  3596,
+                     "durationMs":  120,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  3761,
+                     "durationMs":  50,
+                     "viseme":  "fv"
+                 },
+                 {
+                     "timeMs":  3830,
+                     "durationMs":  75,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  3933,
+                     "durationMs":  65,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  4023,
+                     "durationMs":  80,
+                     "viseme":  "qwod"
+                 },
+                 {
+                     "timeMs":  4133,
+                     "durationMs":  65,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  4223,
+                     "durationMs":  80,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  4333,
+                     "durationMs":  80,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  4443,
+                     "durationMs":  95,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  4574,
+                     "durationMs":  75,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  4677,
+                     "durationMs":  87,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  4677,
+                     "durationMs":  87,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  4918,
+                     "durationMs":  85,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  5036,
+                     "durationMs":  120,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  5201,
+                     "durationMs":  70,
+                     "viseme":  "qwod"
+                 },
+                 {
+                     "timeMs":  5297,
+                     "durationMs":  125,
+                     "viseme":  "o"
+                 },
+                 {
+                     "timeMs":  5470,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  5532,
+                     "durationMs":  60,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  5614,
+                     "durationMs":  125,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  5787,
+                     "durationMs":  120,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  5952,
+                     "durationMs":  60,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  6035,
+                     "durationMs":  70,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  6131,
+                     "durationMs":  115,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  6290,
+                     "durationMs":  85,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  6407,
+                     "durationMs":  65,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  6496,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  6558,
+                     "durationMs":  55,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  6634,
+                     "durationMs":  115,
+                     "viseme":  "bmp"
+                 },
+                 {
+                     "timeMs":  6792,
+                     "durationMs":  55,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  6868,
+                     "durationMs":  90,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  6992,
+                     "durationMs":  95,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  7123,
+                     "durationMs":  90,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  7247,
+                     "durationMs":  75,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  7350,
+                     "durationMs":  110,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  7502,
+                     "durationMs":  110,
+                     "viseme":  "o"
+                 },
+                 {
+                     "timeMs":  7654,
+                     "durationMs":  75,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  7757,
+                     "durationMs":  65,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  7846,
+                     "durationMs":  70,
+                     "viseme":  "fv"
+                 },
+                 {
+                     "timeMs":  7943,
+                     "durationMs":  85,
+                     "viseme":  "o"
+                 },
+                 {
+                     "timeMs":  8060,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  8122,
+                     "durationMs":  55,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  8198,
+                     "durationMs":  110,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  8349,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  8418,
+                     "durationMs":  55,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  8494,
+                     "durationMs":  70,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  8590,
+                     "durationMs":  40,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  8645,
+                     "durationMs":  110,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  8797,
+                     "durationMs":  100,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  8935,
+                     "durationMs":  200,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  9210,
+                     "durationMs":  750,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  10244,
+                     "durationMs":  100,
+                     "viseme":  "mouthIdle"
+                 },
+                 {
+                     "timeMs":  10382,
+                     "durationMs":  75,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  10485,
+                     "durationMs":  45,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  10547,
+                     "durationMs":  55,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  10623,
+                     "durationMs":  100,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  10761,
+                     "durationMs":  50,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  10830,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  10830,
+                     "durationMs":  50,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  10967,
+                     "durationMs":  50,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  11036,
+                     "durationMs":  60,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  11119,
+                     "durationMs":  105,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  11264,
+                     "durationMs":  57,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  11264,
+                     "durationMs":  57,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  11422,
+                     "durationMs":  40,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  11477,
+                     "durationMs":  85,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  11594,
+                     "durationMs":  130,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  11773,
+                     "durationMs":  95,
+                     "viseme":  "o"
+                 },
+                 {
+                     "timeMs":  11904,
+                     "durationMs":  55,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  11980,
+                     "durationMs":  55,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  12056,
+                     "durationMs":  35,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  12104,
+                     "durationMs":  105,
+                     "viseme":  "bmp"
+                 },
+                 {
+                     "timeMs":  12249,
+                     "durationMs":  62,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  12249,
+                     "durationMs":  62,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  12421,
+                     "durationMs":  70,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  12517,
+                     "durationMs":  50,
+                     "viseme":  "r"
+                 },
+                 {
+                     "timeMs":  12586,
+                     "durationMs":  55,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  12662,
+                     "durationMs":  90,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  12786,
+                     "durationMs":  90,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  12910,
+                     "durationMs":  47,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  12910,
+                     "durationMs":  47,
+                     "viseme":  "chjsh"
+                 },
+                 {
+                     "timeMs":  13041,
+                     "durationMs":  65,
+                     "viseme":  "aei"
+                 },
+                 {
+                     "timeMs":  13130,
+                     "durationMs":  130,
+                     "viseme":  "cdgknstxyz"
+                 },
+                 {
+                     "timeMs":  13310,
+                     "durationMs":  750,
+                     "viseme":  "mouthIdle"
+                 }
+             ]
+}

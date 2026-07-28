@@ -35,6 +35,19 @@ const AI_VISIMES = [
   "cdgknstxyz",
 ] as const;
 
+type AiViseme = (typeof AI_VISIMES)[number];
+type PresetSpeechCue = {
+  timeMs: number;
+  durationMs: number;
+  viseme: AiViseme | "mouthIdle";
+};
+type PresetSpeechTrack = {
+  id: string;
+  text: string;
+  voice: string;
+  cues: PresetSpeechCue[];
+};
+
 type DemoStatus = "idle" | "listening" | "thinking" | "talking";
 
 type SpeechRecognitionResultEvent = {
@@ -362,6 +375,9 @@ function CurioAiDemo({
   const speechPauseTimer = useRef<number | null>(null);
   const speechWatchFrame = useRef<number | null>(null);
   const speechHasStarted = useRef(false);
+  const presetAudio = useRef<HTMLAudioElement | null>(null);
+  const presetAnimationFrame = useRef<number | null>(null);
+  const presetCueIndex = useRef(0);
   const recognition = useRef<BrowserSpeechRecognition | null>(null);
 
   const layout = useMemo(
@@ -407,6 +423,21 @@ function CurioAiDemo({
     speechHasStarted.current = false;
   };
 
+  const stopPresetSpeech = () => {
+    if (presetAnimationFrame.current !== null) {
+      window.cancelAnimationFrame(presetAnimationFrame.current);
+      presetAnimationFrame.current = null;
+    }
+    if (presetAudio.current) {
+      presetAudio.current.onplay = null;
+      presetAudio.current.onended = null;
+      presetAudio.current.onerror = null;
+      presetAudio.current.pause();
+      presetAudio.current = null;
+    }
+    presetCueIndex.current = 0;
+  };
+
   const setSilentMouth = () => {
     stopVisemeTimer();
     stopSpeechWatch();
@@ -427,6 +458,7 @@ function CurioAiDemo({
       window.clearTimeout(speechEndTimer.current);
       speechEndTimer.current = null;
     }
+    stopPresetSpeech();
     setSilentMouth();
     setStatus("idle");
   };
@@ -465,7 +497,8 @@ function CurioAiDemo({
     speechWatchFrame.current = window.requestAnimationFrame(checkSpeech);
   };
 
-  const speak = (text: string) => {
+  const speakWithBrowser = (text: string) => {
+    stopPresetSpeech();
     const synthesizer = (window as unknown as { speechSynthesis?: SpeechSynthesis })
       .speechSynthesis;
     synthesizer?.cancel();
@@ -530,6 +563,68 @@ function CurioAiDemo({
     synthesizer.speak(utterance);
   };
 
+  const speakPreset = async (presetId: string, text: string) => {
+    window.speechSynthesis?.cancel();
+    stopPresetSpeech();
+    setSilentMouth();
+
+    const assetBase = `${import.meta.env.BASE_URL}assets/curio/speech/${presetId}`;
+
+    try {
+      const response = await fetch(`${assetBase}.json`);
+      if (!response.ok) throw new Error("Preset speech timing could not be loaded.");
+      const track = (await response.json()) as PresetSpeechTrack;
+      const audio = new Audio(`${assetBase}.wav`);
+      audio.preload = "auto";
+      presetAudio.current = audio;
+      presetCueIndex.current = 0;
+
+      const drawPresetViseme = () => {
+        if (presetAudio.current !== audio) return;
+
+        const timeMs = audio.currentTime * 1000;
+        while (
+          presetCueIndex.current + 1 < track.cues.length &&
+          track.cues[presetCueIndex.current + 1].timeMs <= timeMs
+        ) {
+          presetCueIndex.current += 1;
+        }
+
+        const cue = track.cues[presetCueIndex.current];
+        const cueIsActive =
+          cue && timeMs >= cue.timeMs && timeMs < cue.timeMs + cue.durationMs;
+
+        resetVisemeNumbers();
+        if (cueIsActive && cue.viseme !== "mouthIdle") {
+          setRiveNumber("mouthIdle", 0);
+          setRiveNumber(cue.viseme, 100);
+        } else {
+          setRiveNumber("mouthIdle", 100);
+        }
+
+        presetAnimationFrame.current =
+          window.requestAnimationFrame(drawPresetViseme);
+      };
+
+      audio.onplay = () => {
+        setStatus("talking");
+        fireState("idle");
+        presetAnimationFrame.current =
+          window.requestAnimationFrame(drawPresetViseme);
+      };
+      audio.onended = finishSpeaking;
+      audio.onerror = () => {
+        stopPresetSpeech();
+        speakWithBrowser(text);
+      };
+
+      await audio.play();
+    } catch {
+      stopPresetSpeech();
+      speakWithBrowser(text);
+    }
+  };
+
   const askCurio = (rawQuestion: string) => {
     const cleanQuestion = rawQuestion.trim();
     if (!cleanQuestion || status === "thinking" || status === "talking") return;
@@ -546,7 +641,12 @@ function CurioAiDemo({
     responseTimer.current = window.setTimeout(() => {
       const response = getCurioResponse(cleanQuestion);
       setAnswer(response);
-      speak(response);
+      const presetId = getPresetSpeechId(cleanQuestion);
+      if (presetId) {
+        void speakPreset(presetId, response);
+      } else {
+        speakWithBrowser(response);
+      }
     }, 900);
   };
 
@@ -643,6 +743,7 @@ function CurioAiDemo({
       if (speechWatchFrame.current !== null) {
         window.cancelAnimationFrame(speechWatchFrame.current);
       }
+      stopPresetSpeech();
       recognition.current?.stop();
       window.speechSynthesis?.cancel();
     },
@@ -802,6 +903,17 @@ function pickChildLikeVoice(voices: SpeechSynthesisVoice[]) {
       })
       .sort((a, b) => a.preference - b.preference)[0]?.voice ?? null
   );
+}
+
+function getPresetSpeechId(question: string) {
+  const lower = question.toLowerCase();
+
+  if (lower.includes("sky") && lower.includes("blue")) return "sky-blue";
+  if (lower.includes("plant") || lower.includes("tree") || lower.includes("flower")) {
+    return "plants-eat";
+  }
+  if (lower.includes("moon")) return "moon-light";
+  return null;
 }
 
 function getCurioResponse(question: string) {
