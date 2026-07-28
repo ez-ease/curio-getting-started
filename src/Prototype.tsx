@@ -358,6 +358,8 @@ function CurioAiDemo({
   const visemeIndex = useRef(0);
   const responseTimer = useRef<number | null>(null);
   const fallbackSpeechTimer = useRef<number | null>(null);
+  const speechEndTimer = useRef<number | null>(null);
+  const speechPauseTimer = useRef<number | null>(null);
   const speechWatchFrame = useRef<number | null>(null);
   const speechHasStarted = useRef(false);
   const recognition = useRef<BrowserSpeechRecognition | null>(null);
@@ -408,6 +410,10 @@ function CurioAiDemo({
   const setSilentMouth = () => {
     stopVisemeTimer();
     stopSpeechWatch();
+    if (speechPauseTimer.current !== null) {
+      window.clearTimeout(speechPauseTimer.current);
+      speechPauseTimer.current = null;
+    }
     resetVisemeNumbers();
     setRiveNumber("mouthIdle", 100);
   };
@@ -417,16 +423,20 @@ function CurioAiDemo({
       window.clearTimeout(fallbackSpeechTimer.current);
       fallbackSpeechTimer.current = null;
     }
+    if (speechEndTimer.current !== null) {
+      window.clearTimeout(speechEndTimer.current);
+      speechEndTimer.current = null;
+    }
     setSilentMouth();
     setStatus("idle");
   };
 
-  const startVisemes = (text: string) => {
+  const startVisemes = (text: string, startIndex = 0) => {
     stopVisemeTimer();
     resetVisemeNumbers();
     setRiveNumber("mouthIdle", 0);
     const sequence = createVisemeSequence(text);
-    visemeIndex.current = 0;
+    visemeIndex.current = startIndex;
 
     const showNextViseme = () => {
       resetVisemeNumbers();
@@ -479,11 +489,41 @@ function CurioAiDemo({
       fireState("idle");
       startVisemes(text);
       watchSpeechCompletion(synthesizer);
+      fallbackSpeechTimer.current = window.setTimeout(
+        finishSpeaking,
+        Math.max(3500, text.length * 105),
+      );
     };
     utterance.onboundary = (event) => {
-      visemeIndex.current = Math.round(
+      const boundaryVisemeIndex = Math.round(
         (event.charIndex / Math.max(1, text.length)) * createVisemeSequence(text).length,
       );
+      startVisemes(text, boundaryVisemeIndex);
+
+      const spokenWordLength =
+        event.charLength || text.slice(event.charIndex).match(/^[\w'-]+/)?.[0].length || 1;
+      const trailingText = text
+        .slice(event.charIndex + spokenWordLength)
+        .replace(/[\s.,!?;:'"-]/g, "");
+
+      if (trailingText.length === 0) {
+        if (speechEndTimer.current !== null) {
+          window.clearTimeout(speechEndTimer.current);
+        }
+        speechEndTimer.current = window.setTimeout(
+          finishSpeaking,
+          Math.max(220, (spokenWordLength * 62) / utterance.rate + 70),
+        );
+      }
+
+      if (speechPauseTimer.current !== null) {
+        window.clearTimeout(speechPauseTimer.current);
+      }
+      speechPauseTimer.current = window.setTimeout(() => {
+        stopVisemeTimer();
+        resetVisemeNumbers();
+        setRiveNumber("mouthIdle", 100);
+      }, Math.max(180, (spokenWordLength * 62) / utterance.rate));
     };
     utterance.onend = finishSpeaking;
     utterance.onerror = finishSpeaking;
@@ -593,6 +633,12 @@ function CurioAiDemo({
       if (responseTimer.current !== null) window.clearTimeout(responseTimer.current);
       if (fallbackSpeechTimer.current !== null) {
         window.clearTimeout(fallbackSpeechTimer.current);
+      }
+      if (speechEndTimer.current !== null) {
+        window.clearTimeout(speechEndTimer.current);
+      }
+      if (speechPauseTimer.current !== null) {
+        window.clearTimeout(speechPauseTimer.current);
       }
       if (speechWatchFrame.current !== null) {
         window.cancelAnimationFrame(speechWatchFrame.current);
